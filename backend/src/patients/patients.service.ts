@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import {
   FollowUp,
   FollowUpDocument,
@@ -67,10 +67,17 @@ export class PatientsService {
 
   async getHistory(id: string) {
     const patient = await this.findOne(id);
+    const patientObjectId = new Types.ObjectId(id);
 
     const [visits, followups] = await Promise.all([
-      this.visitModel.find({ patientId: id }).sort({ visitAt: -1 }).lean(),
-      this.followupModel.find({ patientId: id }).sort({ createdAt: -1 }).lean(),
+      this.visitModel
+        .find({ patientId: patientObjectId })
+        .sort({ visitAt: -1 })
+        .lean(),
+      this.followupModel
+        .find({ patientId: patientObjectId })
+        .sort({ createdAt: -1 })
+        .lean(),
     ]);
 
     return {
